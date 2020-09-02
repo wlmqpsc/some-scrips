@@ -19,7 +19,7 @@ author()
  #  | |/ /_/ / / /|  // /___ / /___   
  #  |___//___//_/ |_/ \____//_____/   
  #  
- #  Version:  Alpha_0.1.0
+ #  Version:  Alpha_0.1.1
  #  Author:   Vince
  #  Website:  https://www.vincehut.top
  #  Note:     This script is used to change the SSH port! Work on CentOS 8
@@ -38,27 +38,25 @@ tip_1()
 	fi
 }
 
-choose_fuction()
+choose_function()
 {
-	echo -e " Which fuction do you need?"
+	echo -e " Which function do you need?"
 	echo -e " 1.Add new SSH port"
 	echo -e " 2.Close an SSH port"
 	read -e -p " Please type the number:" selected
 	case $selected in
-		1) echo -e " You selected 1\n It will start after 3 seconds!"
-		sleep 3s
-		fuction_1
+		1) echo -e " You selected 1\n"
+		function_1
 		;;
-		2) echo -e " You selected 2\n It will start after 3 seconds!"
-		sleep 3s
-		fuction_2
+		2) echo -e " You selected 2\n"
+		function_2
 		;;
 		*) echo -e "$Yellow You should select a number above!$End_color"
 		;;
 	esac
 }
 
-fuction_1()
+function_1()
 {
 	install_software
 	check_system
@@ -69,7 +67,7 @@ fuction_1()
 	tip_2
 }
 
-fuction_2()
+function_2()
 {
 	install_software
 	scan_config
@@ -81,8 +79,7 @@ fuction_2()
 
 install_software()
 {
-	echo "Install basic software"
-	sleep 2s
+	echo " Check and install basic software"
 	command -v semanage &>/dev/null
 	if [[ $? -ne 0 ]];
 	then
@@ -116,7 +113,10 @@ read_config()
 	port_read=$(cat ${SSH_conf} | grep -v '#' | grep "Port " | awk '{print $2}')
 	if [[ -z ${port_read} ]];
 	then
+		read_status=1
 		port_read=22
+	else
+		read_status=2
 	fi
 	echo -e "$Yellow Your SSH port is:\n$End_color$port_read "
 }
@@ -152,22 +152,21 @@ add_port()
 {
 	echo -e "$Yellow Back up /etc/ssh/sshd_config to /etc/ssh/sshd_config.bak$End_color"
 	cp -f "$SSH_conf" "/etc/ssh/sshd_config.bak"
-	echo -e "\nPort ${new_port}" >> "${SSH_conf}"
-	if [ $port_read -eq 22 ]
+	if [ $read_status -eq 1 ]
 	then
-		echo -e "\nPort ${port_read}" >> "${SSH_conf}"
-		echo -e "\nPort ${new_port}" >> "${SSH_conf}"
+		echo -e "Port ${port_read}" >> "${SSH_conf}"
+		echo -e "Port ${new_port}" >> "${SSH_conf}"
 	else
-		echo -e "\nPort ${new_port}" >> "${SSH_conf}"
+		echo -e "Port ${new_port}" >> "${SSH_conf}"
 	fi
-	echo " restart sshd..."
-	systemctl restart sshd.service
 	echo " Add new port to firewalld..."
 	firewall-cmd --zone=public --add-port=${new_port}/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
 	echo -e " Add new port to SE Linux..."
 	semanage port -a -t ssh_port_t -p tcp ${new_port}
+	echo " Restart sshd..."
+	systemctl restart sshd.service
 }
 
 tip_2()
@@ -185,14 +184,16 @@ tip_3()
 
 delete_port()
 {
-	read -e -p "Please type a port number:" port_number
-	sed -i "/Port ${port_number}/d" "${SSH_config}"
-	echo " restart sshd..."
-	systemctl restart sshd.service
+	read -e -p " Please type a port number:" port_number
+	sed -i "/Port ${port_number}/d" "${SSH_conf}"
 	echo " Remove old port from firewalld..."
 	firewall-cmd --zone=public --remove-port=${port_number}/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
+	echo " Remove old port from SE Linux"
+	semanage port -d -t ssh_port_t -p tcp ${port_number}
+	echo " restart sshd..."
+	systemctl restart sshd.service
 }
 
 tip_4()
@@ -202,4 +203,4 @@ tip_4()
 }
 
 tip_1
-choose_fuction
+choose_function
