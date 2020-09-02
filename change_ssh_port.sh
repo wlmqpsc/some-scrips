@@ -95,8 +95,9 @@ install_software()
 
 check_system()
 {
-	bit=`uname -m`
-	echo -e "$Yellow Your system is$End_color `lsb_release -si` $bit."
+	echo -e "$Yellow Your system is: $End_color `lsb_release -si` "
+	lsb_release -d
+	echo -e "Bit:`uname -m`"
 }
 
 scan_config()
@@ -188,6 +189,7 @@ check_close_input()
 {
 	while :
 	do
+		echo -e "$Yellow Please input a port above!\n Ctrl + c to cancel.$End_color"
 		read -e -p " Please input a old port:" port_close
 		echo $((${port_close}+0)) &>/dev/null
 		if [[ $? -eq 0 ]];
