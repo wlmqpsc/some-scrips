@@ -62,7 +62,7 @@ function_1()
 	check_system
 	scan_config
 	read_config
-	set_port
+	check_add_input
 	add_port
 	tip_2
 }
@@ -73,6 +73,7 @@ function_2()
 	scan_config
 	read_config
 	tip_3
+	check_close_input
 	delete_port
 	tip_4
 }
@@ -121,7 +122,7 @@ read_config()
 	echo -e "$Yellow Your SSH port is:\n$End_color$port_read "
 }
 
-set_port()
+check_add_input()
 {
 	while :
 	do
@@ -182,23 +183,42 @@ tip_3()
 	echo " Which SSH port do you want to close?"
 }
 
+check_close_input()
+{
+	while :
+	do
+		read -e -p " Please input a old port:" port_close
+		echo $((${port_close}+0)) &>/dev/null
+		if [[ $? -eq 0 ]];
+ 	     	then
+			if [[ ${port_close} -ge 1 ]] && [[ ${port_close} -le 65535 ]];
+			then
+				break
+			else
+				echo -e "$Red Error! Please enter the correct port!$End_color"
+			fi
+		else
+			echo -e "$Red Error! Please enter the correct port!$End_color"
+		fi
+	done
+}
+
 delete_port()
 {
-	read -e -p " Please type a port number:" port_number
-	sed -i "/Port ${port_number}/d" "${SSH_conf}"
+	sed -i "/Port ${port_close}/d" "${SSH_conf}"
 	echo " Remove old port from firewalld..."
-	firewall-cmd --zone=public --remove-port=${port_number}/tcp --permanent
+	firewall-cmd --zone=public --remove-port=${port_close}/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
 	echo " Remove old port from SE Linux"
-	semanage port -d -t ssh_port_t -p tcp ${port_number}
+	semanage port -d -t ssh_port_t -p tcp ${port_close}
 	echo " restart sshd..."
 	systemctl restart sshd.service
 }
 
 tip_4()
 {
-	echo -e "$Ywllow The port ${port_number} has been closed!$End_color "
+	echo -e "$Ywllow The port ${port_close} has been closed!$End_color "
 	echo " Thanks for use! "
 }
 
