@@ -34,7 +34,7 @@ tip_1()
 	then
 		author
 	else
-		echo " Exit!" && exit 0
+		echo " Exit!" && exit 1
 	fi
 }
 
@@ -137,6 +137,7 @@ check_add_input()
 				then
 					echo -e "$Red Error! The new port is the same as the old port!$End_color"
 				else
+					are_you_sure
 					echo -e "$Yellow New Port: $new_port $End_color"
 					break
 				fi
@@ -193,6 +194,7 @@ check_close_input()
  	     	then
 			if [[ ${port_close} -ge 1 ]] && [[ ${port_close} -le 65535 ]];
 			then
+				are_you_sure
 				break
 			else
 				echo -e "$Red Error! Please enter the correct port!$End_color"
@@ -220,6 +222,16 @@ tip_4()
 {
 	echo -e "$Ywllow The port ${port_close} has been closed!$End_color "
 	echo " Thanks for use! "
+}
+
+are_you_sure()
+{
+	echo -e " Are you sure? [Y/n]"
+	read answer_1
+	if [[ "$answer_1" = "n" ]] || [[ "$answer_1" =  "no" ]] || [[ "$answer_1" = "NO" ]] || [[ "$answer_1" = "N" ]]
+	then
+	exit 1
+	fi
 }
 
 tip_1
