@@ -150,10 +150,9 @@ set_port()
 
 add_port()
 {
-	echo -e "$Green Ba"
-		echo -e "\nPort ${new_port}" >> "${SSH_conf}"
-	elseck up /etc/ssh/sshd_config to /etc/ssh/sshd_config.bak$End_color"
+	echo -e "$Yellow Back up /etc/ssh/sshd_config to /etc/ssh/sshd_config.bak$End_color"
 	cp -f "$SSH_conf" "/etc/ssh/sshd_config.bak"
+	echo -e "\nPort ${new_port}" >> "${SSH_conf}"
 	if [ $port_read -eq 22 ]
 	then
 		echo -e "\nPort ${port_read}" >> "${SSH_conf}"
@@ -167,7 +166,7 @@ add_port()
 	firewall-cmd --zone=public --add-port=${new_port}/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
-	echo -e " Add new poet to SE Linux..."
+	echo -e " Add new port to SE Linux..."
 	semanage port -a -t ssh_port_t -p tcp ${new_port}
 }
 
@@ -176,7 +175,7 @@ tip_2()
 	echo -e "$Green SSH port has been added successful!$End_color"
 	echo -e "$Yelllow Waring: The old port also can be used.$End_color"
 	echo -e "$Yellow Please test the new port and use this script to close the old one.$End_color"
-	echo " Thanks for use! :)"
+	echo " Thanks for use!"
 }
 
 tip_3()
@@ -199,7 +198,7 @@ delete_port()
 tip_4()
 {
 	echo -e "$Ywllow The port ${port_number} has been closed!$End_color "
-	echo " Thanks for use! :)"
+	echo " Thanks for use! "
 }
 
 tip_1
