@@ -19,7 +19,7 @@ author()
  #  | |/ /_/ / / /|  // /___ / /___   
  #  |___//___//_/ |_/ \____//_____/   
  #  
- #  Version:  Alpha_0.1.1
+ #  Version:  Alpha_0.2.0
  #  Author:   Vince
  #  Website:  https://www.vincehut.top
  #  Note:     This script is used to change the SSH port! Work on CentOS 8
@@ -29,7 +29,7 @@ $End_color"
 tip_1()
 {
 	echo -e "$Yellow Do you want to change the SSH port? [y/N]$End_color"
-	read answer
+	read -r answer
 	if [[ "$answer" = "y" ]] || [[ "$answer" =  "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]];
 	then
 		author
@@ -43,7 +43,7 @@ choose_function()
 	echo -e " Which function do you need?"
 	echo -e " 1.Add new SSH port"
 	echo -e " 2.Close an SSH port"
-	read -e -p " Please type the number:" selected
+	read -r -e -p " Please type the number:" selected
 	case $selected in
 		1) echo -e " You selected 1\n"
 		function_1
@@ -85,13 +85,11 @@ function_2()
 install_software()
 {
 	echo " Check and install basic software"
-	command -v semanage &>/dev/null
-	if [[ $? -ne 0 ]];
+	if ! (command -v semanage &>/dev/null);
 	then
 		dnf -y install policycoreutils-python-utils
 	fi
-	command -v lsb_release &>/dev/null
-	if [[ $? -ne 0 ]];
+	if ! (command -v lsb_release &>/dev/null);
 	then
 		dnf -y install redhat-lsb-core
 	fi
@@ -99,20 +97,18 @@ install_software()
 
 check_system()
 {
-	echo -e "$Yellow Your system is: $End_color `lsb_release -si` "
+	echo -e "$Yellow Your system is: $End_color $(lsb_release -si) "
 	lsb_release -d
-	echo -e "Bit:`uname -m`"
+	echo -e "Bit:$(uname -m)"
 }
 
 check_firewall()
 {
 	echo " Check Firewalld..."
-	systemctl status iptables &>/dev/null
-	if [[ $? -ne 0 ]]
+	if ! (systemctl status iptables &>/dev/null);
 	then
 		echo " Firewalld is not running! Try iptables..."
-		systemctl status iptables &>/dev/null
-		if [[ $? -ne 0 ]]
+		if ! (systemctl status iptables &>/dev/null)
 		then
 			echo -e "$Red Error: Neither firewalld nor can be used!$End_color"
 			echo -e " Please check your firewall!\n You should not disable the firewall!"
@@ -137,7 +133,7 @@ scan_config()
 
 read_config()
 {
-	port_read=$(cat ${SSH_conf} | grep -v '#' | grep "Port " | awk '{print $2}')
+	port_read=$(grep -v '#' ${SSH_conf} | grep "Port " | awk '{print $2}')
 	if [[ -z ${port_read} ]];
 	then
 		read_status=1
@@ -153,13 +149,12 @@ check_add_input()
 	while :
 	do
 		echo -e "$Yellow Use port more than 1000 is suggested!\n Ctrl + c to cancel.$End_color"
-		read -e -p " Please input new port[1-65535]:" new_port
-		echo $((${new_port}+0)) &>/dev/null
-		if [[ $? -eq 0 ]];
+		read -r -e -p " Please input new port[1-65535]:" new_port
+		if echo $((new_port+0)) &>/dev/null
  	     	then
 			if [[ ${new_port} -ge 1 ]] && [[ ${new_port} -le 65535 ]];
 			then
-				if [[ ${new_port} = ${read_port} ]];
+				if [[ ${new_port} = "${port_read}" ]];
 				then
 					echo -e "$Red Error! The new port is the same as the old port!$End_color"
 				else
@@ -194,7 +189,7 @@ add_firewall_port()
 add_port_firewalld()
 {
 	echo " Add new port to firewalld..."
-	firewall-cmd --zone=public --add-port=${new_port}/tcp --permanent
+	firewall-cmd --zone=public --add-port="${new_port}"/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
 }
@@ -202,8 +197,8 @@ add_port_firewalld()
 add_port_iptables()
 {
 	echo " Add new port to iptables..."
-	iptables -A INPUT -p tcp --dport ${new_port} -j ACCEPT
-	iptables -A OUTPUT -p tcp --sport ${new_port} -j ACCEPT
+	iptables -A INPUT -p tcp --dport "${new_port}" -j ACCEPT
+	iptables -A OUTPUT -p tcp --sport "${new_port}" -j ACCEPT
 	echo " Save rules..."
 	iptables save
 	echo "Restart iptables..."
@@ -222,7 +217,7 @@ add_ssh_port()
 		echo -e "Port ${new_port}" >> "${SSH_conf}"
 	fi
 	echo -e " Add new port to SE Linux..."
-	semanage port -a -t ssh_port_t -p tcp ${new_port}
+	semanage port -a -t ssh_port_t -p tcp "${new_port}"
 	echo " Restart sshd..."
 	systemctl restart sshd.service
 }
@@ -230,7 +225,7 @@ add_ssh_port()
 tip_2()
 {
 	echo -e "$Green SSH port has been added successful!$End_color"
-	echo -e "$Yelllow Waring: The old port also can be used.$End_color"
+	echo -e "$Yellow Waring: The old port also can be used.$End_color"
 	echo -e "$Yellow Please test the new port and use this script to close the old one.$End_color"
 	echo " Thanks for use!"
 }
@@ -245,9 +240,8 @@ check_delete_input()
 	while :
 	do
 		echo -e "$Yellow Please input a port above!\n Ctrl + c to cancel.$End_color"
-		read -e -p " Please input a old port:" port_close
-		echo $((${port_close}+0)) &>/dev/null
-		if [[ $? -eq 0 ]];
+		read -r -e -p " Please input a old port:" port_close
+		if echo $((port_close+0)) &>/dev/null
  	     	then
 			if [[ ${port_close} -ge 1 ]] && [[ ${port_close} -le 65535 ]];
 			then
@@ -280,7 +274,7 @@ delete_firewall_port()
 delete_port_firewalld()
 {
 	echo " Remove old port from firewalld..."
-	firewall-cmd --zone=public --remove-port=${port_close}/tcp --permanent
+	firewall-cmd --zone=public --remove-port="${port_close}"/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
 }
@@ -288,8 +282,8 @@ delete_port_firewalld()
 delete_port_iptables()
 {
 	echo " Delete port to iptables..."
-	iptables -A INPUT -p tcp --dport ${port_close} -j DROP
-	iptables -A OUTPUT -p tcp --sport ${port_close} -j DROP
+	iptables -A INPUT -p tcp --dport "${port_close}" -j DROP
+	iptables -A OUTPUT -p tcp --sport "${port_close}" -j DROP
 	echo " Save rules..."
 	iptables save
 	echo "Restart iptables..."
@@ -300,21 +294,21 @@ delete_ssh_port()
 {
 	sed -i "/Port ${port_close}/d" "${SSH_conf}"
 	echo " Remove old port from SE Linux"
-	semanage port -d -t ssh_port_t -p tcp ${port_close}
+	semanage port -d -t ssh_port_t -p tcp "${port_close}"
 	echo " restart sshd..."
 	systemctl restart sshd.service
 }
 
 tip_4()
 {
-	echo -e "$Ywllow The port ${port_close} has been closed!$End_color "
+	echo -e "$Yellow The port ${port_close} has been closed!$End_color "
 	echo " Thanks for use! "
 }
 
 are_you_sure()
 {
 	echo -e " Are you sure? [Y/n]"
-	read answer_1
+	read -r answer_1
 	if [[ "$answer_1" = "n" ]] || [[ "$answer_1" =  "no" ]] || [[ "$answer_1" = "NO" ]] || [[ "$answer_1" = "N" ]];
 	then
 	exit 1
