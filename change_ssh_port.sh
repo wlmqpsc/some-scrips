@@ -105,7 +105,7 @@ check_system()
 check_firewall()
 {
 	echo " Check Firewalld..."
-	if ! (systemctl status iptables &>/dev/null);
+	if ! (systemctl status firewalld &>/dev/null);
 	then
 		echo " Firewalld is not running! Try iptables..."
 		if ! (systemctl status iptables &>/dev/null)
@@ -114,9 +114,12 @@ check_firewall()
 			echo -e " Please check your firewall!\n You should not disable the firewall!"
 			exit 2
 		else
+			echo -e "$Green Success! Iptables is running!$End_color"
+			echo -e "$Yellow Suggest use Firewalld!$End_color"
 			status_firewall=2
 		fi
 	else
+		echo -e "$Green Success! Firewalld is running!$End_color"
 		status_firewall=1
 	fi
 }
@@ -180,7 +183,7 @@ add_firewall_port()
 		then
 			add_port_iptables
 		else
-			echo -e "$Red Error: Uknown Error! Please connect me!"
+			echo -e "$Red Error: Uknown Error!$End_color"
 			exit 10
 		fi
 	fi
@@ -265,7 +268,7 @@ delete_firewall_port()
 		then
 			delete_port_iptables
 		else
-			echo -e "$Red Error: Uknown Error!"
+			echo -e "$Red Error: Uknown Error!$End_color"
 			exit 10
 		fi
 	fi
