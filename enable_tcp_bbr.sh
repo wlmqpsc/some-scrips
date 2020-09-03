@@ -39,7 +39,7 @@ tip_1()
 	fi
 }
 
-install_bbr()
+enable_bbr()
 {
 	ckeck_kernel_version
 	add_sysctl
@@ -169,3 +169,4 @@ enable_bbr()
 }
 
 tip_1
+enable_bbr
