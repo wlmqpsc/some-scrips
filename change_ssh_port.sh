@@ -19,12 +19,12 @@ author()
  #  | |/ /_/ / / /|  // /___ / /___   
  #  |___//___//_/ |_/ \____//_____/   
  #  
- #  Version:  Alpha_0.2.2
- #  Author:   Vince
- #  Website:  https://www.vincehut.top
- #  Note:     This script is used to change the SSH port! Work on CentOS 8
- #	      If you use Aliyun, TencentCloud etc.
- #	      Maybe you should open the port on your server pancel first!
+ #  Version:	0.2.2_Alpha
+ #  Author:	Vince
+ #  Website:	https://www.vincehut.top
+ #  Note:	This script is used to change the SSH port! Work on CentOS 8
+ #		If you use Aliyun, TencentCloud etc.
+ #		Maybe you should open the port on your server pancel first!
 $End_color"
 }
 
