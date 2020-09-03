@@ -19,10 +19,10 @@ author()
  #  | |/ /_/ / / /|  // /___ / /___   
  #  |___//___//_/ |_/ \____//_____/   
  #  
- #  Version:	0.1.0_Alpha
+ #  Version:	0.1.3_Alpha
  #  Author:	Vince
  #  Website:	https://www.vincehut.top
- #  Note:	This script is used to enable the tcp bbr! Work on CentOS 8 KVM
+ #  Note:	This script is used to enable the tcp bbr! Work on CentOS 6+ KVM
  #		Don't try this script on OpenVZ VPS!
 $End_color"
 }
@@ -39,7 +39,7 @@ tip_1()
 	fi
 }
 
-enable_bbr()
+install_bbr()
 {
 	ckeck_kernel_version
 	add_sysctl
@@ -57,7 +57,7 @@ check_kernel_version()
 	else
 		echo -e "$Red Oh no! Your kernel version < 4.9 $End_color"
 		read -r -e -p " Do you want to upgrade kernel now? [Y/n]" answer_1
-		if [[ "$answer_1" = "n" ]] || [[ "$answer_1" =  "no" ]] || [[ "$answer_1" = "NO" ]] || [[ "$answer_1" = "N" ]];
+		if [[ "$answer_1" = "n" ]] || [[ "$answer_1" = "no" ]] || [[ "$answer_1" = "NO" ]] || [[ "$answer_1" = "N" ]];
 		then
 			exit 1
 		else
@@ -81,7 +81,7 @@ check_system_release()
 	then
 		release_x=6
 	else
-		echo -e " Your system is not support!"
+		echo -e "$Red Error: Your system is not support!$End_color"
 		exit 2
 	fi
 	upgrade_kernel
@@ -135,7 +135,7 @@ update_kernel_6()
 
 regenerate_grub_cfg()
 {
-	if (command -v grub2 &>/dev/null);
+	if (command -v grub2-mkconfig &>/dev/null);
 	then
 		grub2-mkconfig -o /boot/grub2/grub.cfg && grub2-set-default 0
 	else
@@ -165,8 +165,8 @@ add_sysctl()
 enable_bbr()
 {
 	sysctl -p
-	echo " Now, you can check the bbr."
+	echo "$Green Now, you can check the tcp_bbr.$End_color"
 }
 
 tip_1
-enable_bbr
+install_bbr
