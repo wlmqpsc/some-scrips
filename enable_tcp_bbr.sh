@@ -41,7 +41,7 @@ tip_1()
 
 install_bbr()
 {
-	ckeck_kernel_version
+	check_kernel_version
 	add_sysctl
 	enable_bbr
 }
@@ -165,7 +165,7 @@ add_sysctl()
 enable_bbr()
 {
 	sysctl -p
-	echo "$Green Now, you can check the tcp_bbr.$End_color"
+	echo -e "$Green Now, you can check the tcp_bbr.$End_color"
 }
 
 tip_1
