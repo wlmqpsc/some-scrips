@@ -60,21 +60,25 @@ function_1()
 {
 	install_software
 	check_system
+	check_firewall
 	scan_config
 	read_config
 	check_add_input
-	add_port
+	add_firewall_port
+	add_ssh_port
 	tip_2
-}
+	}
 
 function_2()
 {
 	install_software
+	check_firewall
 	scan_config
 	read_config
 	tip_3
-	check_close_input
-	delete_port
+	check_delete_input
+	delete_firewall_port
+	delete_ssh_port
 	tip_4
 }
 
@@ -98,6 +102,27 @@ check_system()
 	echo -e "$Yellow Your system is: $End_color `lsb_release -si` "
 	lsb_release -d
 	echo -e "Bit:`uname -m`"
+}
+
+check_firewall()
+{
+	echo " Check Firewalld..."
+	systemctl status iptables &>/dev/null
+	if [[ $? -ne 0 ]]
+	then
+		echo " Firewalld is not running! Try iptables..."
+		systemctl status iptables &>/dev/null
+		if [[ $? -ne 0 ]]
+		then
+			echo -e "$Red Error: Neither firewalld nor can be used!$End_color"
+			echo -e " Please check your firewall!\n You should not disable the firewall!"
+			exit 2
+		else
+			status_firewall=2
+		fi
+	else
+		status_firewall=1
+	fi
 }
 
 scan_config()
@@ -151,7 +176,41 @@ check_add_input()
 	done
 }
 
-add_port()
+add_firewall_port()
+{
+	if [ $status_firewall -eq 1 ];
+	then
+		add_port_firewalld
+		if [ $status_firewall -eq 2 ];
+		then
+			add_port_iptables
+		else
+			echo -e "$Red Error: Uknown Error! Please connect me!"
+			exit 10
+		fi
+	fi
+}
+
+add_port_firewalld()
+{
+	echo " Add new port to firewalld..."
+	firewall-cmd --zone=public --add-port=${new_port}/tcp --permanent
+	echo " Reload firewalld..."
+	firewall-cmd --reload
+}
+
+add_port_iptables()
+{
+	echo " Add new port to iptables..."
+	iptables -A INPUT -p tcp --dport ${new_port} -j ACCEPT
+	iptables -A OUTPUT -p tcp --sport ${new_port} -j ACCEPT
+	echo " Save rules..."
+	iptables save
+	echo "Restart iptables..."
+	systemctl restart iptables
+}
+
+add_ssh_port()
 {
 	echo -e "$Yellow Back up /etc/ssh/sshd_config to /etc/ssh/sshd_config.bak$End_color"
 	cp -f "$SSH_conf" "/etc/ssh/sshd_config.bak"
@@ -162,10 +221,6 @@ add_port()
 	else
 		echo -e "Port ${new_port}" >> "${SSH_conf}"
 	fi
-	echo " Add new port to firewalld..."
-	firewall-cmd --zone=public --add-port=${new_port}/tcp --permanent
-	echo " Reload firewalld..."
-	firewall-cmd --reload
 	echo -e " Add new port to SE Linux..."
 	semanage port -a -t ssh_port_t -p tcp ${new_port}
 	echo " Restart sshd..."
@@ -185,7 +240,7 @@ tip_3()
 	echo " Which SSH port do you want to close?"
 }
 
-check_close_input()
+check_delete_input()
 {
 	while :
 	do
@@ -207,13 +262,43 @@ check_close_input()
 	done
 }
 
-delete_port()
+delete_firewall_port()
 {
-	sed -i "/Port ${port_close}/d" "${SSH_conf}"
+	if [ $status_firewall -eq 1 ];
+	then
+		delete_port_firewalld
+		if [ $status_firewall -eq 2 ];
+		then
+			delete_port_iptables
+		else
+			echo -e "$Red Error: Uknown Error!"
+			exit 10
+		fi
+	fi
+}
+
+delete_port_firewalld()
+{
 	echo " Remove old port from firewalld..."
 	firewall-cmd --zone=public --remove-port=${port_close}/tcp --permanent
 	echo " Reload firewalld..."
 	firewall-cmd --reload
+}
+
+delete_port_iptables()
+{
+	echo " Delete port to iptables..."
+	iptables -A INPUT -p tcp --dport ${port_close} -j DROP
+	iptables -A OUTPUT -p tcp --sport ${port_close} -j DROP
+	echo " Save rules..."
+	iptables save
+	echo "Restart iptables..."
+	systemctl restart iptables
+}
+
+delete_ssh_port()
+{
+	sed -i "/Port ${port_close}/d" "${SSH_conf}"
 	echo " Remove old port from SE Linux"
 	semanage port -d -t ssh_port_t -p tcp ${port_close}
 	echo " restart sshd..."
@@ -230,7 +315,7 @@ are_you_sure()
 {
 	echo -e " Are you sure? [Y/n]"
 	read answer_1
-	if [[ "$answer_1" = "n" ]] || [[ "$answer_1" =  "no" ]] || [[ "$answer_1" = "NO" ]] || [[ "$answer_1" = "N" ]]
+	if [[ "$answer_1" = "n" ]] || [[ "$answer_1" =  "no" ]] || [[ "$answer_1" = "NO" ]] || [[ "$answer_1" = "N" ]];
 	then
 	exit 1
 	fi
