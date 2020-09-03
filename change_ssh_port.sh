@@ -19,10 +19,12 @@ author()
  #  | |/ /_/ / / /|  // /___ / /___   
  #  |___//___//_/ |_/ \____//_____/   
  #  
- #  Version:  Alpha_0.2.0
+ #  Version:  Alpha_0.2.2
  #  Author:   Vince
  #  Website:  https://www.vincehut.top
  #  Note:     This script is used to change the SSH port! Work on CentOS 8
+ #	      If you use Aliyun, TencentCloud etc.
+ #	      Maybe you should open the port on your server pancel first!
 $End_color"
 }
 
@@ -219,7 +221,7 @@ add_ssh_port()
 	else
 		echo -e "Port ${new_port}" >> "${SSH_conf}"
 	fi
-	echo -e " Add new port to SE Linux..."
+	echo -e " Add new port to SE Linux...\n It may take a few seconds"
 	semanage port -a -t ssh_port_t -p tcp "${new_port}"
 	echo " Restart sshd..."
 	systemctl restart sshd.service
@@ -230,6 +232,7 @@ tip_2()
 	echo -e "$Green SSH port has been added successful!$End_color"
 	echo -e "$Yellow Waring: The old port also can be used.$End_color"
 	echo -e "$Yellow Please test the new port and use this script to close the old one.$End_color"
+	echo -e " If you can not connet server with the new port\n Please open an issuse and contact with me!"
 	echo " Thanks for use!"
 }
 
