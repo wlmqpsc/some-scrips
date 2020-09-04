@@ -88,7 +88,7 @@ function_2()
 
 check_system_release()
 {
-	system_release=$(rpm -q centos-release | awk -F - '{print $3}')
+	system_release=$(rpm -q centos-release | awk -F - '{print $3}' | awk -F . '{print $1}')
 	if [ "$system_release" -eq 8 ]
 	then
 		release_x=8
