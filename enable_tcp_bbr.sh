@@ -51,7 +51,7 @@ check_kernel_version()
 	echo -e " Your kernel version is 'uname -r'"
 	version_1=$(uname -r | awk -F . '{print $1}')
 	version_2=$(uname -r | awk -F . '{print $2}')
-	if [ "$version_1" -ge 4 ] && [ "$version_2" -ge 9 ]
+	if [[ "$version_1" -eq 4 ]] && [[ "$version_2" -ge 9 ]] || [[ "$version_1" -ge 4 ]]
 	then
 		echo -e "$Green Great! Your kernel version >= 4.9 $End_color"
 	else
@@ -119,7 +119,7 @@ upgrade_kernel_7()
 {
 	echo " Intsll elrepo..."
 	rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-	yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+	yum -y install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
 	echo " Update your kernel..."
 	yum --enablerepo=elrepo-kernel install kernel-ml -y
 }
@@ -128,7 +128,7 @@ update_kernel_6()
 {
 	echo " Intsll elrepo..."
 	rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-	yum install https://www.elrepo.org/elrepo-release-6.el6.elrepo.noarch.rpm
+	yum -y install https://www.elrepo.org/elrepo-release-6.el6.elrepo.noarch.rpm
 	echo " Update your kernel..."
 	yum --enablerepo=elrepo-kernel install kernel-ml -y
 }
@@ -150,7 +150,7 @@ regenerate_grub_cfg()
 
 tip_2()
 {
-	echo -e "$Green Upgrade complate! Please reboot your server!$End_color"
+	echo -e "$Green Upgrade complate! Please reboot your server!\n And run this script again!$End_color"
 	exit 0
 }
 
@@ -165,7 +165,14 @@ add_sysctl()
 enable_bbr()
 {
 	sysctl -p
-	echo -e "$Green Now, you can check the tcp_bbr.$End_color"
+	echo -e "$Green Now, you can check the tcp_bbr!$End_color"
+	echo -e "$Green Run some commands to print info..."
+	echo "lsmod | grep tcp_bbr"
+	echo -e "$(lsmod | grep tcp_bbr)"
+	echo "sysctl net.ipv4.tcp_available_congestion_control"
+	echo -e "$(sysctl net.ipv4.tcp_available_congestion_control)"
+	echo "sysctl net.ipv4.tcp_congestion_control"
+	echo -e "$(sysctl net.ipv4.tcp_congestion_control)"
 }
 
 tip_1
