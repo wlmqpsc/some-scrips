@@ -22,7 +22,7 @@ author()
  #  Version:	0.2.2_Alpha
  #  Author:	Vince
  #  Website:	https://www.vincehut.top
- #  Note:	This script is used to change the SSH port! Work on CentOS 8
+ #  Note:	This script is used to change the SSH port! Work on CentOS 7+
  #		If you use Aliyun, TencentCloud etc.
  #		Maybe you should open the port on your server pancel first!
 $End_color"
@@ -60,6 +60,7 @@ choose_function()
 
 function_1()
 {
+	check_system_release
 	install_software
 	check_system
 	check_firewall
@@ -73,6 +74,7 @@ function_1()
 
 function_2()
 {
+	check_system_release
 	install_software
 	check_firewall
 	scan_config
@@ -84,16 +86,44 @@ function_2()
 	tip_4
 }
 
+check_system_release()
+{
+	system_release=$(rpm -q centos-release | awk -F - '{print $3}')
+	if [ "$system_release" -eq 8 ]
+	then
+		release_x=8
+	elif [ "$system_release" -eq 7 ]
+	then
+		release_x=7
+	else
+		echo -e "$Red Error: Your system is not support!$End_color"
+		exit 2
+	fi
+}
+
 install_software()
 {
 	echo " Check and install basic software"
-	if ! (command -v semanage &>/dev/null);
+	if [ "$release_x" -eq 8 ];
 	then
-		dnf -y install policycoreutils-python-utils
-	fi
-	if ! (command -v lsb_release &>/dev/null);
+		if ! (command -v semanage &>/dev/null);
+		then
+			dnf -y install policycoreutils-python-utils
+		fi
+		if ! (command -v lsb_release &>/dev/null);
+		then
+			dnf -y install redhat-lsb-core
+		fi
+	elif [ "$release_x" -eq 7 ];
 	then
-		dnf -y install redhat-lsb-core
+		if ! (command -v semanage &>/dev/null);
+		then
+			yum -y install policycoreutils-python
+		fi
+		if ! (command -v lsb_release &>/dev/null);
+		then
+			yum -y install redhat-lsb-core
+		fi
 	fi
 }
 
