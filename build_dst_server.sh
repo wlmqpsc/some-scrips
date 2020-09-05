@@ -63,11 +63,14 @@ check_rely()
 	fi
 }
 
-generate_config()
+generate_scrips()
 {
 	cd ~/dst/bin/ || exit 2
 	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Master > dst_overworld.sh
 	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Caves > dst_caves.sh
-	sh dst_overworld.sh && sleep 40s
-	sh
 }
+
+tip_1
+install
+check_rely
+generate_scrips
