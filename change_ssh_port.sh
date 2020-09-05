@@ -144,7 +144,14 @@ check_firewall()
 		then
 			echo -e "$Red Error: Neither firewalld nor can be used!$End_color"
 			echo -e " Please check your firewall!\n You should not disable the firewall!"
-			exit 2
+			read -r -e -p "Continue run without firewall? [y/N]" answer
+			if [[ "$answer" = "y" ]] || [[ "$answer" = "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]]
+			then
+				echo -e " Suggest enable the firewall!\n Continue run..."
+				sleep 2s
+			else
+				exit 2
+			fi
 		else
 			echo -e "$Green Success! Iptables is running!$End_color"
 			echo -e "$Yellow Suggest use Firewalld!$End_color"
