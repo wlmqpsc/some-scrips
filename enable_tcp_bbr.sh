@@ -166,7 +166,7 @@ enable_bbr()
 {
 	sysctl -p
 	echo -e "$Green Now, you can check the tcp_bbr!$End_color"
-	echo -e "$Green Run some commands to print info..."
+	echo -e "$Green Run some commands to print info...$End_color"
 	echo "lsmod | grep tcp_bbr"
 	echo -e "$(lsmod | grep tcp_bbr)"
 	echo "sysctl net.ipv4.tcp_available_congestion_control"

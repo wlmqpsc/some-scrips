@@ -144,8 +144,8 @@ check_firewall()
 		then
 			echo -e "$Red Error: Neither firewalld nor can be used!$End_color"
 			echo -e " Please check your firewall!\n You should not disable the firewall!"
-			read -r -e -p "Continue run without firewall? [y/N]" answer
-			if [[ "$answer" = "y" ]] || [[ "$answer" = "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]]
+			read -r -e -p "Continue run without firewall? [y/N]" answer_2
+			if [[ "$answer_2" = "y" ]] || [[ "$answer_2" = "yes" ]] || [[ "$answer_2" = "YES" ]] || [[ "$answer_2" = "Y" ]] || [[ "$answer_2" = "Yes" ]]
 			then
 				echo -e " Suggest enable the firewall!\n Continue run..."
 				sleep 2s
