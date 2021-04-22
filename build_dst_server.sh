@@ -19,7 +19,7 @@ author()
  #  
  #  Author:	Vince
  #  Website:	https://www.vincehut.top
- #  Note:	This script is used build a Don't Starve Together server. Work on Debian 10 x64."
+ #  Note:	This script is used build a Don't Starve Together server. Work on Debian 10 x64.$End_color"
 }
 
 tip_1()
@@ -35,40 +35,67 @@ tip_1()
 	fi
 }
 
+add_nonfree()
+{
+	echo -e "$Yellow To install steamcmd, you need to enable non-free packages manually!$End_color"
+	echo -e " Open the /etc/apt/sources.list [Y/n]"
+	read -r answer
+	if [[ "$answer" = "n" ]] || [[ "$answer" =  "no" ]] || [[ "$answer" = "NO" ]] || [[ "$answer" = "N" ]];
+	then
+		are_you_sure
+	else
+		nano /etc/apt/sources.list
+		are_you_sure
+	fi
+}
+
+are_you_sure()
+{
+	echo -e "$Yellow Are you sure you added the non-free? [y/N]$End_color"
+	read -r answer
+	if [[ "$answer" = "y" ]] || [[ "$answer" =  "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]];
+	then
+		echo " Try to install steamcmd"
+	else
+		echo " Please enable non-free package manually and run this scrip again!" && exit 1
+	fi
+}
+
 install()
 {
-	echo " Install steamcmd"
-	apt-get -y install wget
-	add-apt-repository multiverse
 	dpkg --add-architecture i386
-	apt-get update
-	apt-get install lib32gcc1 steamcmd
+	apt-get -y update
+	apt-get -y install lib32gcc1 steamcmd wget
 	echo " Add a user steam"
 	useradd -m steam
 	echo " Install dst server..."
-	su steam -c 'steamcmd +login anonymous +force_install_dir /home/steam/dst +app_update 343050 validate +quit'
+	su steam -c '/usr/games/steamcmd +login anonymous +force_install_dir /home/steam/dst +app_update 343050 validate +quit'
 }
 
 check_rely()
 {
-	if ( ldd dontstarve_dedicated_server_nullrenderer )
+	if ldd "/home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer" | grep 'not found' ;
 	then
-		echo -e "$Green Congratulation! rely check passed!$End_color"
-	else
-		echo -e "$Red Error: rely check faild! Please search the error name above$End_color"
-		echo -e "$Yellow you need to fix rely manually!$End_color"
+		ldd /home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer
+		echo -e "$Red Error: rely check faild! Please search the name which is not found above$End_color"
+		echo -e "$Yellow you need to fix dependence error manually!$End_color"
 		exit 3
+	else
+		echo -e "$Green Congratulation! rely check passed!$End_color"
 	fi
 }
 
 generate_scrips()
 {
 	cd /home/steam/dst || exit 2
-	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Master > dst_overworld.sh
-	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Caves > dst_caves.sh
+	echo /home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Master > dst_overworld.sh
+	echo /home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Caves > dst_caves.sh
+	chmod 775 ./dst_overworld.sh
+	chmod 775 ./dst_caves.sh
 }
 
 tip_1
+add_nonfree
 install
 check_rely
 generate_scrips
