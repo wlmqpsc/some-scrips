@@ -19,11 +19,12 @@ author()
  #  
  #  Author:	Vince
  #  Website:	https://www.vincehut.top
- #  Note:	This script is used build a Don't Starve Together server! Work on CentOS 7"
+ #  Note:	This script is used build a Don't Starve Together server. Work on Debian 10 x64."
 }
 
 tip_1()
 {
+	echo -e "$Yellow This scrip only work on Debian! Do not try on other distribution!$End_color"
 	echo -e "$Yellow Do you want to install DST server? [y/N]$End_color"
 	read -r answer
 	if [[ "$answer" = "y" ]] || [[ "$answer" =  "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]];
@@ -36,20 +37,16 @@ tip_1()
 
 install()
 {
-	yum -y update
-	yum -y install glibc.i686 libstdc++.i686 wget screen libcurl.i686
-	echo " Add a user dst"
-	user add -m dst
-	sudo su dst
-	mkdir steamcmd
-	cd steamcmd || exit 2
-	echo " Download steam installer..."
-	wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
-	echo " Decompress steamcmd_linux.tar.gz..."
-	sleep 1s
-	tar -zxvf steamcmd_linux.tar.gz
+	echo " Install steamcmd"
+	apt-get -y install wget
+	add-apt-repository multiverse
+	dpkg --add-architecture i386
+	apt-get update
+	apt-get install lib32gcc1 steamcmd
+	echo " Add a user steam"
+	useradd -m steam
 	echo " Install dst server..."
-	./steamcmd.sh +login anonymous +force_install_dir ~/dst +app_update 343050 validate +quit
+	su steam -c 'steamcmd +login anonymous +force_install_dir /home/steam/dst +app_update 343050 validate +quit'
 }
 
 check_rely()
@@ -58,14 +55,15 @@ check_rely()
 	then
 		echo -e "$Green Congratulation! rely check passed!$End_color"
 	else
-		echo -e "$Red Error: you need to fix rely manually!$End_color"
+		echo -e "$Red Error: rely check faild! Please search the error name above$End_color"
+		echo -e "$Yellow you need to fix rely manually!$End_color"
 		exit 3
 	fi
 }
 
 generate_scrips()
 {
-	cd ~/dst/bin/ || exit 2
+	cd /home/steam/dst || exit 2
 	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Master > dst_overworld.sh
 	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Caves > dst_caves.sh
 }
