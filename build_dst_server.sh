@@ -94,8 +94,14 @@ generate_scrips()
 	chmod 775 ./dst_caves.sh
 }
 
+tip_end()
+{
+	echo -e "$Green Congratulation! you can add your config and run the server!"
+}
+
 tip_1
 add_nonfree
 install
 check_rely
 generate_scrips
+tip_end
