@@ -94,14 +94,44 @@ generate_scrips()
 	chmod 775 ./dst_caves.sh
 }
 
-tip_end()
+tip_2()
 {
-	echo -e "$Green Congratulation! you can add your config and run the server!"
+	echo -e "$Green Congratulation! you can add your config and run the server!$End_color"
 }
 
+######################
+#Because every sever need mods and mod config are not same. 
+#Even if without mods, different server has different type of game.
+#Default DST config is useless.
+#Functions below are not finished.
+tip_3()
+{
+	echo -e "$Yellow Do you want to make a default config for your DST server? [y/N]$End_color"
+	read -r answer
+	if [[ "$answer" = "y" ]] || [[ "$answer" =  "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]];
+	then
+	else
+		echo " Exit!" && exit 1
+	fi
+}
+
+get_token()
+{
+	echo -e " Please input your server token."
+	read -r token
+	echo -e " Your token is:\n $token"
+	echo -e " Is it right? [Y/n]"
+	read -r answer
+	if [[ "$answer" = "n" ]] || [[ "$answer" =  "no" ]] || [[ "$answer" = "NO" ]] || [[ "$answer" = "N" ]];
+	then
+	get_token
+	fi
+}
+######################
+ 
 tip_1
 add_nonfree
 install
 check_rely
 generate_scrips
-tip_end
+tip_2
