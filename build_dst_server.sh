@@ -35,6 +35,23 @@ tip_1()
 	fi
 }
 
+judgement_install()
+{
+	if [ ! -e "/home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer" ];
+	then
+		add_nonfree
+		are_you_sure
+		install
+		check_rely
+		generate_scrips
+		tip_2
+	else
+		check_rely
+		generate_scrips
+		tip_2
+	fi
+}
+
 add_nonfree()
 {
 	echo -e "$Yellow To install steamcmd, you need to enable non-free packages manually!$End_color"
@@ -131,8 +148,4 @@ get_token()
 ######################
  
 tip_1
-add_nonfree
-install
-check_rely
-generate_scrips
-tip_2
+judgement_install
