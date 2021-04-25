@@ -110,6 +110,7 @@ tip_3()
 	read -r answer
 	if [[ "$answer" = "y" ]] || [[ "$answer" =  "yes" ]] || [[ "$answer" = "YES" ]] || [[ "$answer" = "Y" ]] || [[ "$answer" = "Yes" ]];
 	then
+		echo " Downloading server config."
 	else
 		echo " Exit!" && exit 1
 	fi
