@@ -105,8 +105,10 @@ check_rely()
 generate_scrips()
 {
 	cd /home/steam/dst/bin || exit 2
-	echo /home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Master > dst_overworld.sh
-	echo /home/steam/dst/bin/dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Caves > dst_caves.sh
+	#Do not use /home/steam/dst/bin instead of ./ below.
+	#refers to https://forums.kleientertainment.com/forums/topic/59204-server-stopped-working-caves-beta/
+	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Master > dst_overworld.sh
+	echo ./dontstarve_dedicated_server_nullrenderer -console -cluster MyDediServer -shard Caves > dst_caves.sh
 	chmod 775 ./dst_overworld.sh
 	chmod 775 ./dst_caves.sh
 }
